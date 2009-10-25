@@ -62,9 +62,7 @@ def retrieve_url(url):
 	except:
 		html = ""
 		
-	#return html
-	# fix the fucked up encoding in original document
-	return re.sub("Medi.n WebAudit RTLcsoport rtlmost.hu", "", html)
+	return html
 
 
 def find_episode_hash(html):
@@ -113,7 +111,7 @@ def get_episodes(url):
 	"""docstring for get_episodes"""
 
 	html = retrieve_url(url)
-	soup = BeautifulSoup(html, fromEncoding="utf-8")
+	soup = BeautifulSoup(html)
 	episodesHtml = soup.findAll("div", attrs={"class" : "video-img-cont-catchup cont-first"})
 
 	""" result
@@ -145,7 +143,10 @@ def get_episodes(url):
 def get_shows():
 	"""docstring for get_shows"""
 	html = retrieve_url(BASE_URL)
-	soup = BeautifulSoup(html, fromEncoding="utf-8")
+	# fix the fucked up encoding in original document
+	html = re.sub("Medi.n WebAudit RTLcsoport rtlmost.hu", "", html)
+	
+	soup = BeautifulSoup(html)
 	#print soup.prettify
 	#print "Autómánia"
 	showsHtml = soup.find(id="topnav04-ul").findAll("li")
