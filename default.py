@@ -29,6 +29,11 @@ __version__ = "0.0.1"
 
 BASE_URL = "http://www.rtlklub.hu/most/"
 
+def clear_escape(string):
+	"""Clears the backslash escaping"""
+	
+	return re.sub(r'\\(.)', r'\1', string)
+
 def get_params(paramstring):
         param=[]
         if len(paramstring)>=2:
@@ -57,7 +62,9 @@ def retrieve_url(url):
 	except:
 		html = ""
 		
-	return html
+	#return html
+	# fix the fucked up encoding in original document
+	return re.sub("Medi.n WebAudit RTLcsoport rtlmost.hu", "", html)
 
 
 def find_episode_hash(html):
@@ -97,7 +104,7 @@ def get_episode(url):
 	html = retrieve_url("http://www.rtlklub.hu/most/player/content/parameters.php?hash="+episodeHash)
 
 	# unescape the backslashes
-	episode = demjson.decode(re.sub(r'\\(.)', r'\1', html))
+	episode = demjson.decode(html)
 	return episode["configuration"]
 
 
@@ -163,7 +170,7 @@ def show_episodes(episodes):
 	for episode in episodes:
 		episodeData = get_episode(episode["url"])
 
-		item = xbmcgui.ListItem(label=episodeData["title"], thumbnailImage=episodeData["image"])
+		item = xbmcgui.ListItem(label=episodeData["title"], thumbnailImage=clear_escape(episodeData["image"]))
 			#label=track["track"]["trackTitle"])
 			#label2=track["track"]["trackTitle"])		
 		labels={
@@ -173,7 +180,7 @@ def show_episodes(episodes):
 		
 		item.setInfo(type = 'movie', infoLabels=labels)
 
-		xbmcplugin.addDirectoryItem(int(sys.argv[1]), episodeData["file"][0], item, False, len(episodes))
+		xbmcplugin.addDirectoryItem(int(sys.argv[1]), clear_escape(episodeData["file"][0]), item, False, len(episodes))
 	
 
 	

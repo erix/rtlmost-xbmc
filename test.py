@@ -15,6 +15,8 @@ import lib.demjson as demjson
 from xml.sax.saxutils import unescape
 from lib.BeautifulSoup import BeautifulSoup
 
+import pdb
+
 BASE_URL = "http://www.rtlklub.hu/most/"
 
 def ByteToHex( byteStr ):
@@ -43,8 +45,10 @@ def retrieve_url(url):
 		usock.close()
 	except:
 		html = ""
-		
-	return html
+	
+	# fix the fucked up encoding in original document
+	return re.sub("Medi.n WebAudit RTLcsoport rtlmost.hu", "", html)
+	#return html
 
 def find_episode_hash(html):
 	"""
@@ -78,12 +82,12 @@ def get_episode():
 	
 	"""
 	html = retrieve_url("http://www.rtlklub.hu/most/5217_automania_09-10-24")
-	#print html
+
 	episodeHash = find_episode_hash(html)
 	html = retrieve_url("http://www.rtlklub.hu/most/player/content/parameters.php?hash="+episodeHash)
-	
+
 	# unescape the backslashes
-	episode = demjson.decode(re.sub(r'\\(.)', r'\1', html))
+	episode = demjson.decode(html)
 	return episode["configuration"]
 	
 	
@@ -93,6 +97,7 @@ def get_episodes():
 	
 	html = retrieve_url("http://www.rtlklub.hu/most/musorok/automania")
 	soup = BeautifulSoup(html, fromEncoding="utf-8")
+	print soup.originalEncoding
 	episodesHtml = soup.findAll("div", attrs={"class" : "video-img-cont-catchup cont-first"})
 	
 	""" result
@@ -125,7 +130,7 @@ def get_shows():
 	"""docstring for get_shows"""
 	html = retrieve_url(BASE_URL)
 	soup = BeautifulSoup(html, fromEncoding="utf-8")
-	#print soup.prettify
+	#print soup
 	#print "Autómánia"
 	showsHtml = soup.find(id="topnav04-ul").findAll("li")
 	shows = []
@@ -134,11 +139,12 @@ def get_shows():
 	return shows
 
 def main():
-	reload(sys); sys.setdefaultencoding('utf-8')
-	#get_shows()
-	episodes = get_episodes()
-	print episodes
-	#get_episode()
+	#reload(sys); sys.setdefaultencoding('utf-8')
+	#print get_shows()
+	#pdb.set_trace()
+	#episodes = get_episodes()
+	#print episodes
+	print get_episode()
 	
 
 if __name__ == '__main__':
