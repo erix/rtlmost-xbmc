@@ -149,6 +149,8 @@ def get_shows():
 	#print soup.prettify
 	#print "Autómánia"
 	showsHtml = soup.find(id="topnav04-ul").findAll("li")
+	#remove the last item
+	showsHtml.pop(len(showsHtml)-1)
 	shows = []
 	for show in showsHtml:
 		shows.append({"title" : show.a.string, "url" : show.a['href']})
